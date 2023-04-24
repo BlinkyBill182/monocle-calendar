@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  font-family: monospace, sans-serif;
 }
 
 .App-logo {
@@ -35,4 +36,58 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-header h2 {
+  margin: 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 0.5rem;
+}
+
+.calendar-day {
+  padding: 0.5rem;
+  height: 82px;
+  width: 122px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #0000002e;
+}
+
+.calendar-day-number {
+  position: absolute;
+  font-size: 10px;
+}
+
+.calendar-day.selected {
+  background-color: #007aff;
+  color: #fff;
+}
+
+.calendar-events table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.calendar-events td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+.calendar-events td:first-child {
+  font-weight: bold;
+}
+
+.calendar-events p {
+  margin: 0;
 }
