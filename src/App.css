@@ -91,3 +91,12 @@
 .calendar-events p {
   margin: 0;
 }
+
+.calendar-event-counter{
+  font-weight: bold;
+  font-size: xxx-large;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+

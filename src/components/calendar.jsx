@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
+import Api from "../helper/api";
+const api = new Api();
 
 function Calendar() {
     const [today, setToday] = useState(moment());
@@ -8,42 +10,38 @@ function Calendar() {
     const [newEvent, setNewEvent] = useState({title: "", time: ""});
     const [events, setEvents] = useState([]);
 
-    useEffect(() => {
-        const storedEvents = JSON.parse(localStorage.getItem("events"));
-        if (storedEvents) {
-            setEvents(storedEvents);
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem("events", JSON.stringify(events));
-    }, [events]);
+    const fetchEvents = () => {
+        api
+            .getEvents()
+            .then((response) => {
+                setEvents(response.data)
+            })
+            .catch((err) => console.log(err));
+    };
+    useEffect(fetchEvents, []);
 
     const handleNewEventChange = (event) => {
         setNewEvent({...newEvent, [event.target.name]: event.target.value});
     };
 
-    const handleNewEventSubmit = (event) => {
+    const handleNewEventSubmit = async (event) => {
         event.preventDefault();
         const { title, time } = newEvent;
         if (title && time) {
-            setEvents((prevEvents) => {
-                const updatedEvents = [...prevEvents];
+            try {
                 const selectedDateString = selectedDate.format("YYYY-MM-DD");
-                const selectedDateIndex = updatedEvents.findIndex(
-                    (event) => event.date === selectedDateString
-                );
-                if (selectedDateIndex === -1) {
-                    updatedEvents.push({
-                        date: selectedDateString,
-                        events: [{ title, time }],
-                    });
-                } else {
-                    updatedEvents[selectedDateIndex].events.push({ title, time });
-                }
-                return updatedEvents;
-            });
-            setNewEvent({ title, time });
+                const payload = {
+                    date: selectedDateString,
+                    title,
+                    time
+                };
+                const response = await api.addEvent(payload)
+                setEvents([...events, response.data]);
+                setNewEvent({ title: '', time: '' });
+            } catch (error) {
+                console.error(error);
+                // Display error message to user
+            }
         }
     };
 
@@ -69,8 +67,9 @@ function Calendar() {
         return Array.from({length: diffDays}, (_, i) => monthStart.clone().add(i, "days"));
     };
 
-    const getEventsForSelectedDate = () => {
-        return events.filter((event) => event.date === selectedDate.format("YYYY-MM-DD"));
+    const getEventsForSelectedDate = (date) => {
+        const dateHandle = date || selectedDate;
+        return events.filter((event) => moment(dateHandle).isSame(event.date, 'day')) ?? [];
     };
 
     return (
@@ -102,11 +101,11 @@ function Calendar() {
                             onClick={() => setSelectedDate(day.startOf("day"))}
                         >
                             <div className="calendar-day-number">{day.format("D")}</div>
-                            {getEventsForSelectedDate().map((event) => (
-                                <div key={event.title} className="calendar-event">
-                                    {event.title} - {event.time}
+                            {
+                                getEventsForSelectedDate(day).length > 0 && <div className="calendar-event-counter">
+                                    {getEventsForSelectedDate(day).length}
                                 </div>
-                            ))}
+                            }
                         </div>
                     ))}
                 </div>
